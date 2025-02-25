@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net20</TargetFramework>
+    <RootNamespace>sodoff_http_wrapper</RootNamespace>
+    <Platforms>AnyCPU;x86</Platforms>
+  </PropertyGroup>
+
+</Project>
