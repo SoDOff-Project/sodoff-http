@@ -3,7 +3,8 @@
 #include <winhttp.h>
 #include <stdlib.h>
 
-__declspec(dllexport) char* https_get(const char* url) {
+__declspec(dllexport) unsigned char* https_get(const char* url, DWORD* outLength) {
+    *outLength = 0;
     int wlen = MultiByteToWideChar(CP_UTF8, 0, url, -1, NULL, 0);
     if (wlen == 0)
         return NULL;
@@ -84,9 +85,9 @@ __declspec(dllexport) char* https_get(const char* url) {
         return NULL;
     }
 
-    char* buffer = NULL; DWORD totalSize = 0, size = 0;
+    unsigned char* buffer = NULL; DWORD totalSize = 0, size = 0;
     while (WinHttpQueryDataAvailable(hRequest, &size) && size) {
-        char* newBuffer = realloc(buffer, totalSize + size + 1);
+        unsigned char* newBuffer = realloc(buffer, totalSize + size + 1);
         if (!newBuffer) {
             free(buffer);
             buffer = NULL;
@@ -98,18 +99,19 @@ __declspec(dllexport) char* https_get(const char* url) {
         if (!WinHttpReadData(hRequest, buffer + totalSize, size, &read)) break;
         totalSize += read;
     }
-    if (buffer)
-        buffer[totalSize] = '\0';
 
     WinHttpCloseHandle(hRequest);
     WinHttpCloseHandle(hConnect);
     WinHttpCloseHandle(hSession);
     free(wurl);
 
+    if (buffer)
+        *outLength = totalSize;
     return buffer;
 }
 
-__declspec(dllexport) char* https_post(const char* url, const char* form) {
+__declspec(dllexport) unsigned char* https_post(const char* url, const char* form, DWORD* outLength) {
+    *outLength = 0;
     int wlen = MultiByteToWideChar(CP_UTF8, 0, url, -1, NULL, 0);
     if (!wlen)
         return NULL;
@@ -190,10 +192,10 @@ __declspec(dllexport) char* https_post(const char* url, const char* form) {
         return NULL;
     }
 
-    char* buffer = NULL;
+    unsigned char* buffer = NULL;
     DWORD totalSize = 0, size = 0;
     while (WinHttpQueryDataAvailable(hRequest, &size) && size) {
-        char* newBuffer = realloc(buffer, totalSize + size + 1);
+        unsigned char* newBuffer = realloc(buffer, totalSize + size + 1);
         if (!newBuffer) {
             free(buffer);
             buffer = NULL;
@@ -205,17 +207,18 @@ __declspec(dllexport) char* https_post(const char* url, const char* form) {
             break;
         totalSize += read;
     }
-    if (buffer)
-        buffer[totalSize] = '\0';
 
     WinHttpCloseHandle(hRequest);
     WinHttpCloseHandle(hConnect);
     WinHttpCloseHandle(hSession);
     free(wurl);
+
+    if (buffer)
+        *outLength = totalSize;
     return buffer;
 }
 
-__declspec(dllexport) void free_string(char* str) {
-    if (str)
-        free(str);
+__declspec(dllexport) void free_buffer(unsigned char* buffer) {
+    if (buffer)
+        free(buffer);
 }
