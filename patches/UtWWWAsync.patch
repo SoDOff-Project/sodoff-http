@@ -1,0 +1,27 @@
+private IEnumerator DownloadProductRule() {
+    WWWForm wwwform = new WWWForm();
+    UtWWWAsync.mProductRuleRequest = new WWW(ProductConfig.pInstance.AuthenticationServerV3URL + "GetRules", wwwform);
+    // busy waiting instead of yield return
+    while (!UtWWWAsync.mProductRuleRequest.isDone) {
+        Thread.Sleep(20);
+    }
+    bool error = false;
+    if (UtWWWAsync.mProductRuleRequest.isDone && !string.IsNullOrEmpty(UtWWWAsync.mProductRuleRequest.text)) {
+        string decryptedData = TripleDES.DecryptUnicode(UtUtilities.DeserializeFromXml(UtWWWAsync.mProductRuleRequest.text, typeof(string)) as string, WsWebService.pSecret);
+        UtWWWAsync.mProductRuleData = UtUtilities.DeserializeFromXml(decryptedData, typeof(GetProductRulesResponse)) as GetProductRulesResponse;
+        if (UtWWWAsync.mProductRuleData == null) {
+            error = true;
+        } else if (UtWWWAsync.mAction != null) {
+            UtWWWAsync.mAction();
+            UtWWWAsync.mAction = null;
+        }
+    } else {
+        error = true;
+    }
+    UtWWWAsync.mProductRuleRequest.Dispose();
+    UtWWWAsync.mProductRuleRequest = null;
+    if (error) {
+        UtUtilities.ShowServerError(this.mProductRuleDownloadFailedText, new OnUiErrorActionEventHandler(this.StartProductRuleDownload), true);
+    }
+    yield break;
+}

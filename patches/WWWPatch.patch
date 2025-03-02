@@ -1,0 +1,234 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using sodoff_http_wrapper;
+using UnityEngine.Internal;
+
+namespace UnityEngine
+{
+    public sealed class WWW : IDisposable {
+        private WWWWrapper wrapper;
+        private AssetBundle internalAssetBundle;
+        private bool loadedBundle;
+
+        public WWW(string url) {
+            Debug.LogError("get");
+            Debug.LogError(url);
+            this.wrapper = new WWWWrapper(url);
+        }
+
+        public WWW(string url, WWWForm form) {
+            Debug.LogError("post");
+            Debug.LogError(url);
+            this.wrapper = new WWWWrapper(url, Encoding.UTF8.GetString(form.data));
+        }
+
+        public WWW(string url, byte[] postData) {
+            throw new Exception("wwwnotimplemented");
+        }
+
+        public WWW(string url, byte[] postData, Hashtable headers) {
+            throw new Exception("wwwnotimplemented2");
+        }
+
+
+        public WWW(string url, byte[] postData, Dictionary<string, string> headers) {
+            throw new Exception("wwwnotimplemented3");
+        }
+
+        public static string EscapeURL(string s) {
+            Encoding utf = Encoding.UTF8;
+            return WWW.EscapeURL(s, utf);
+        }
+
+
+        public static string EscapeURL(string s, [DefaultValue("System.Text.Encoding.UTF8")] Encoding e) {
+            if (s == null || s == string.Empty || e == null) {
+                return null;
+            }
+            return WWWTranscoder.URLEncode(s, e);
+        }
+
+        public Dictionary<string, string> responseHeaders {
+            get {
+                if (!this.wrapper.done) {
+                    throw new Exception("not done");
+                }
+                return null;
+            }
+        }
+
+        private string responseHeadersString {
+            get {
+                Debug.LogError("res header string");
+                return "";
+            }
+        }
+
+        public string text
+        {
+            get
+            {
+                string text = this.wrapper.text;
+                Debug.LogError(text);
+                return text;
+            }
+        }
+
+        internal static Encoding DefaultEncoding
+        {
+            get
+            {
+                return Encoding.ASCII;
+            }
+        }
+
+        public byte[] bytes {
+            get {
+                Debug.LogError("bytes");
+                return this.wrapper.bytes;
+            }
+        }
+
+        public int size {
+            get {
+                Debug.LogError("size");
+                return this.wrapper.size;
+            }
+        }
+
+        public string error {
+            get {
+                if (string.IsNullOrEmpty(this.wrapper.error)) {
+                    Debug.LogError("error false");
+                    return null;
+                }
+                Debug.LogError("error true");
+                return this.wrapper.error;
+            }
+        }
+
+        private Texture2D GetTexture(bool markNonReadable) {
+            Debug.LogError("texture");
+            return null;
+        }
+
+        public Texture2D texture {
+            get {
+                return this.GetTexture(false);
+            }
+        }
+
+        public Texture2D textureNonReadable {
+            get {
+                return this.GetTexture(true);
+            }
+        }
+
+        public AudioClip audioClip {
+            get {
+                Debug.LogError("audio clip");
+                return null;
+            }
+        }
+
+        public MovieTexture movie {
+            get {
+                Debug.LogError("movie");
+                return null;
+            }
+        }
+
+        public void LoadImageIntoTexture(Texture2D tex) {
+            Debug.LogError("LoadImageIntoTexture");
+        }
+
+        public bool isDone {
+            get {
+                Debug.LogError("isdone " + this.wrapper.done.ToString());
+                return this.wrapper.done;
+            }
+        }
+
+        public static string GetURL(string url) {
+            Debug.LogError("geturl");
+            return "dummy";
+        }
+
+        public static Texture2D GetTextureFromURL(string url) {
+            return new WWW(url).texture;
+        }
+
+        public float progress {
+            get {
+                Debug.LogError("progress");
+                return 0.5f;
+            }
+        }
+
+        public float uploadProgress {
+            get {
+                Debug.LogError("upload progress");
+                return 0.5f;
+            }
+        }
+
+        public int bytesDownloaded {
+            get {
+                Debug.LogError("bytes downloaded");
+                return 1;
+            }
+        }
+
+        public void LoadUnityWeb() {
+            Debug.LogError("loadunityweb");
+        }
+
+        public AudioClip oggVorbis {
+            get {
+                Debug.LogError("audioclip");
+                return null;
+            }
+        }
+
+        public string url {
+            get {
+                Debug.LogError("url");
+                return "dummy";
+            }
+        }
+
+        public AssetBundle assetBundle {
+            get {
+                if (!this.loadedBundle) {
+                    this.internalAssetBundle = AssetBundle.CreateFromMemoryImmediate(this.wrapper.bytes);
+                    this.loadedBundle = true;
+                }
+                return this.internalAssetBundle;
+            }
+        }
+
+        public ThreadPriority threadPriority {
+            get {
+                Debug.LogError("gettprior");
+                return ThreadPriority.Normal;
+            }
+            set {
+                Debug.LogError("settprior");
+            }
+        }
+
+        public void Dispose() {}
+
+        public static WWW LoadFromCacheOrDownload(string url, int version) {
+            uint num = 0U;
+            return WWW.LoadFromCacheOrDownload(url, version, num);
+        }
+
+        public static WWW LoadFromCacheOrDownload(string url, int version, [DefaultValue("0")] uint crc) {
+            return new WWW(url);
+        }
+    }
+}
